@@ -73,37 +73,37 @@ pdcb$type <- ordered(pdcb$type, levels = c('naive','L=0',sprintf('L=%d',l)))
 # lw2 <- 0.8
 # colors <- RColorBrewer::brewer.pal(3, 'Dark2')
 # p <- ggplot(data = pd, mapping = aes(x = variable, y = value, group = row))
-# 
+#
 # #p <- p + geom_line(alpha = 0.1)
 # p <- p + geom_line(color = "#DBDBDB")
-# 
+#
 # # p <- p + geom_line(data = pdcb, aes(x = variable, y = value, group = row, color = type),
 # #                    linetype = 'solid' , size = lw2)
-# 
+#
 # p <- p + geom_line(data = pdn, color = colors[[3]], linetype = 'solid', size = lw2)
 # p <- p + geom_line(data = pd0, color = colors[[1]], linetype = 'solid', size = lw2)
 # p <- p + geom_line(data = pdl, color = colors[[2]], linetype = 'solid', size = lw2)
-# 
+#
 # # p <- p + geom_line(data = pdn, color = 'red', linetype = 'solid' , size = lw2)
 # # p <- p + geom_line(data = pd0, color = 'blue', linetype = 'solid', size = lw2)
 # # p <- p + geom_line(data = pdl, color = 'green',, linetype = 'solid', size = lw2)
-# 
-# 
+#
+#
 # p <- p + geom_line(data = subset(pd, row == 1), size = lw, linetype = 'dotdash') #normal
 # p <- p + geom_line(data = subset(pd, row == 2), size = lw, linetype = 'solid') #local outlier
 # p <- p + geom_line(data = subset(pd, row == 3), size = lw, linetype = 'dashed') #global outier
-# 
+#
 # p <- p + theme_light()
 # p <- p + theme( axis.ticks = element_blank(),
 #                 axis.text.x = element_blank(),
-#                 axis.text.y = element_blank(), 
+#                 axis.text.y = element_blank(),
 #                 panel.grid.minor = element_blank(),
 #                 panel.grid.major = element_blank(),
-#                 legend.position="bottom", 
+#                 legend.position="bottom",
 #                 panel.border = element_blank(),
 #                 plot.margin = unit(c(1,1,1,1.5), "lines"))
 # p <- p + labs(x = NULL, y = NULL)
-# 
+#
 # # annotate confidence bands
 # datatext <- data.frame(x = c('V1','V1','V1','V1','V1','V1','V28'),
 #                       y = c(0.08, 0.05, 0.035, -0.03, -0.05, -0.07, -0.15),
@@ -113,7 +113,7 @@ pdcb$type <- ordered(pdcb$type, levels = c('naive','L=0',sprintf('L=%d',l)))
 #                     nudge_x = -1,
 #                    data =  datatext,
 #                    size = 3)
-# 
+#
 # # some code to override clipping
 # # From: http://stackoverflow.com/questions/12409960/ggplot2-annotate-outside-of-plot
 # gt <- ggplot_gtable(ggplot_build(p))
@@ -151,7 +151,7 @@ dev.off()
 
 
 
-# 
+#
 # ## Save
 # w = 100 #mm
 # h = 100 #mm
@@ -161,29 +161,29 @@ dev.off()
 #        units = 'mm',
 #        width = 100,
 #        height = 100)
-# 
+#
 # savename <- sprintf('toyplot_N%d_Nb%d_M%d.pdf', Nbase, Nbump, M)
 # ggsave(filename = file.path(fig.save.path, savename),
 #        plot = gt,
 #        units = 'mm',
 #        width = 100,
 #        height = 100)
-# 
-# 
-# 
+#
+#
+#
 # ## Save
 # dmats <- scale(dmat)
 # #dmats <- dmat # does not play nice with the custom plot, hence use scaling
-# 
+#
 # w = 150 #mm
 # h = 150 #mm
-# 
+#
 # savename <- sprintf('toyplot_cross_N%d_Nb%d_M%d.png', Nbase, Nbump, M)
-# png(file.path(fig.save.path, savename), units = 'mm', res = 300, 
+# png(file.path(fig.save.path, savename), units = 'mm', res = 300,
 #     width = w, height = h)
 # cross.plot(dmats[, x.idx], dmats[, y.idx], 0.1*nrow(dmats)) #41, 48
 # dev.off()
-# 
+#
 # inch.in.mm <- 25.4
 # savename <- sprintf('toyplot_cross_N%d_Nb%d_M%d.pdf', Nbase, Nbump, M)
 # pdf(file.path(fig.save.path, savename),
