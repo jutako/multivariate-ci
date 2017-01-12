@@ -112,12 +112,12 @@ plot.stock.data <- function(stockdl, stockd, cb){
 
 savefile <- file.path(fig.save.path,
                       sprintf('stockdata_blw%d_K%d_L%d.png', blw, k, l))
-png(savefile, width = 10, height = 5, units = 'in', res = 150)
+png(savefile, width = 15, height = 5, units = 'in', res = 150)
 plot.stock.data(stockdl, stockd, cb)
 dev.off()
 
 savefile <- file.path(fig.save.path,
                       sprintf('stockdata_blw%d_K%d_L%d.pdf', blw, k, l))
-pdf(savefile, width = 10, height = 5)
+pdf(savefile, width = 15, height = 5)
 plot.stock.data(stockdl, stockd, cb)
 dev.off()

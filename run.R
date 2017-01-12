@@ -30,6 +30,7 @@ if (!dir.exists(OPTS$dir$pubfig.dir)){ dir.create(OPTS$dir$pubfig.dir) }
 
 # Load some functions to namespace
 source("mvci.R")
+source("mvci_min_interval.R")
 source("mvci_tools.R")
 source("mvci_data_loaders.R")
 source("experiment_tools.R")
