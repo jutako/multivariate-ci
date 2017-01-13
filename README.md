@@ -2,7 +2,7 @@
 
 This repository contains R code to produce some of the figures in manuscript:
 
-"Multivariate confidence intervals": Korpela J., Oikarinen E., Puolamäki K. and Ukkonen A., SIAM International Conference on Data Mining 2017 (SDM 2017)
+"Multivariate confidence intervals": Korpela J., Oikarinen E., Puolamäki K. and Ukkonen A., 2017, Proceedings of the 2017 SIAM International Conference on Data Mining (SDM 2017)
 
 # Howto
 To produce the figures use:
