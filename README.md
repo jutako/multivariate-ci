@@ -5,7 +5,9 @@ This repository contains R code to produce some of the figures in manuscript:
 "Multivariate confidence intervals": Korpela J., Oikarinen E., Puolamäki K. and Ukkonen A., 2017, Proceedings of the 2017 SIAM International Conference on Data Mining (SDM 2017)
 
 # Howto
-To produce the figures use:
+To quickly see how to compute confidence bands see `howto.R`. It also shows which files should be `source()`:d for things to work.
+
+To reproduce the figures in the sDM2017 paper use:
 > source("run.R")
 
 with the root of this repository as your working directory.
