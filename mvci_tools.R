@@ -351,7 +351,7 @@ k.profile <- function(cbfun, cb.contains.fun, data.train, data.test, k.max=floor
     #     matplot(t(matrix(c(cbmat[1,], cbmat[2,], byrow=T, nrow=2)), type="l")
     #     matlines(data.train[rmng.row.arr,], lty=1, lwd=3, col=rgb(0,0,1,1))
 
-    if ((k == k.max+2) | (sum(profile.mat[,k]) == nrow(profile.mat)) ){
+    if ((k > k.max + 2) | (sum(profile.mat[,k]) == nrow(profile.mat)) ){
       # k.max has been reached or all test observations are outside CI
       continue = F
     }
