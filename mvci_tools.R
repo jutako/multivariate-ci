@@ -232,7 +232,7 @@ plot.stockd <- function(cb){
 ## Cross-validation based control procedures
 ##########################################################################################
 
-#' "B -fold crossvalidation curve"
+#' Generic B -fold crossvalidation curve
 #'
 #' Input:
 #'   cbfun         Function to compute the confidence bands with, interface: cbmat = cbfun(data, k)
@@ -291,7 +291,7 @@ fold.profile <- function(cbfun, cb.contains.fun, data, B, k.max=floor(0.5*((B-1)
 }
 
 
-#' Test set "k profile" using whatever CB algorithm
+#' Generic test set "k profile" (using whichever CB algorithm)
 #'
 #' Determines the iterations k at which observations in the test set become extreme
 #' i.e. do not belong to the confidence band anymore. The result is an (1,N) vector
@@ -363,6 +363,255 @@ k.profile <- function(cbfun, cb.contains.fun, data.train, data.test, k.max=floor
 }
 
 
+
+## Minimum width envelope confidence region, FWER controlled, l fold crossvalidation
+#
+# Using cross validation approach aims at approximating the effective k to be used in the mwe.ci()
+# function so that FWER is controlled at level alpha. Improves upon mwe.fwer.ci() which for small N
+# outputs instabile results. Crossvalidation smooths out the instability.
+#
+# Input:
+#   data          (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
+#                                       empirical cdfs of the m variables.
+#   B             (1,1) integer, How many cross validation folds to use. l = [2,...,N].
+#   k.max  (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#                 of the test fold observations are outside confidence band the profile computation
+#                 ends. Can be used to speed up computations when only the beginning of the profile
+#                 curve is of interest.
+#
+# Output:
+#   A list with elements:
+#   profile   (1,N-floor(N/B)) numeric, Crossvalidation based profile of FWER control
+mwe.fold.profile <- function(data, B, k.max = floor(0.5*((B-1)/B)*nrow(data)) ){
+
+  N = nrow(data)
+  M = ncol(data)
+  #browser()
+  # Create folds
+  data <- data[sample(1:N),] #make sure data is randomized
+  fold.len <- floor(N/B)
+  fold.idx <- matrix(c(seq(1,N,fold.len)[1:B], seq(fold.len,N,fold.len)[1:B-1], N), nrow=B, ncol=2)
+  # (N,2) matrix of fold index [start, stop]
+  #fold.idx[,2]-fold.idx[,1]+1
+
+  all.idx <- 1:N
+  B.profiles <- matrix(0, nrow=B, ncol=(N-fold.len))
+  for (b in 1:B){
+    cat(sprintf("round:%d...\n",b))
+    if (fold.len==1){
+      # Selecting a single row from matrix results in a numeric vector! Casting back to matrix flips
+      # the dimensions, thus the transpose. Who the fuck invented this change of class ...
+      data.test <- as.matrix(t(data[fold.idx[b,1]:fold.idx[b,2],]))
+    } else {
+      data.test <- data[fold.idx[b,1]:fold.idx[b,2],]
+    }
+    #browser()
+    B.profiles[b,] <- mwe.k.profile(data[all.idx[-seq(fold.idx[b,1],fold.idx[b,2],1)],],
+                                    data.test,
+                                    k.max)$k.profile[1:(N-fold.len)] / nrow(data.test)
+  }
+
+  # todo: how to average over folds
+  B.profile <- apply(B.profiles, 2, mean, na.rm=T) #coverage: % of rows inside conf band
+  #B.profile <- 1 - colSums(B.profiles, na.rm=T)/N #coverage: % of rows inside conf band
+  #browser()
+  #   plot(B.profile, ylim=c(0,1), type="l")
+  #   lines(matrix(c(0,0,245,1),nrow=2,byrow=T))
+  #   lines(matrix(c(0,alpha,245,alpha),nrow=2,byrow=T))
+  #   browser()
+  return(list(profile = 1 - B.profile,
+              profile.mat = B.profiles,
+              profile.k = seq(0,length(B.profile)-1,1),
+              fold.idx = fold.idx))
+}
+
+
+## Test set "k profile" using Minimum Width Envelope greedy algorithm
+#
+# Determines the iterations k at which observations in the test set become extreme
+# i.e. do not belong to the confidence band anymore. The result is an (1,N) vector
+# of integers {0,1,...,nrow(data.test} identifying how many of the test set observations
+# are extreme at a given k=[1,...,N].
+#
+# This funcition is needed in the mwe.fold() algorithm.
+#
+# Input:
+#   data.rs         (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
+#                   empirical cdfs of the m variables.
+#   data.test       (N.test,M) numeric matrix, Test dataset
+#   k.max    (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#                   of the observations in 'data.test' are outside confidence band the profile
+#                   computation ends. Can be used to speed up computations when only the beginning of the profile
+#                   curve is of interest.
+#
+# Output:
+#   A list with elements:
+#   k.profile   (1,N) vector of integers [0,1,...,nrow(data.test)]
+mwe.k.profile <- function(data.rs, data.test, k.max){
+
+  N.mwe = nrow(data.rs) #size of MWE computation set
+  M = ncol(data.rs)
+  N.test = nrow(data.test) #size of test set
+
+  # (1) Initialize data structures:
+  profile.mat <- matrix(1, nrow=N.test, ncol=N.mwe+1) #store a [0,1] vector for each observation,
+  # reserve the 1st column for the case k=0 i.e. data envelope
+
+  # 'data.rank' = [N.mwe,M] matrix of columnwise ranks, for each column separately
+  data.rank <- apply(data.rs, 2, function(x){order(order(x))}) #(MNlgN)
+
+  # 'CER' = "current extreme ranks" structure
+  # do this in a simpler way (order)
+  CER <- list(r.max = matrix(c(rep(N.mwe,M),rep(N.mwe-1,M)),nrow=2, byrow=T),
+              n.max = matrix(c(apply(data.rank, 2, function(x){which(x==N.mwe)}),
+                               apply(data.rank, 2, function(x){which(x==(N.mwe-1))})), nrow=2, byrow=T),
+              r.min = matrix(c(rep(1,M),rep(2,M)),nrow=2, byrow=T),
+              n.min = matrix(c(apply(data.rank, 2, function(x){which(x==1)}),
+                               apply(data.rank, 2, function(x){which(x==(2))})), nrow=2, byrow=T))
+  # Store current envelope (using already extracted indices)
+  vec.idx.max = 0:(ncol(data.rs)-1)*nrow(data.rs)+CER$n.max[1,]
+  vec.idx.min = 0:(ncol(data.rs)-1)*nrow(data.rs)+CER$n.min[1,]
+  CER <- c(CER, list(env.max=data.rs[vec.idx.max], env.min=data.rs[vec.idx.min]))
+  profile.mat[,1] <- as.integer(row.outside.ci(data.test, CER$env.min, CER$env.max))
+
+  # O(MN)
+
+  n.extr.rows <- 0
+  extreme.obs.inds <- NULL
+  # Keep track of which rows have not yet been removed
+  rmng.row.arr <- 1:N.mwe
+  continue <- T
+  k <- 2
+  while (continue){
+
+    # (2) Find the optimal row to remove (maximize confidence region shrinkage)
+    dU <- rep(0,N.mwe)
+
+    for (m in 1:M){
+      # Add gains from extreme points to the corresponding observations
+      dU[CER$n.max[1,m]] <- dU[CER$n.max[1,m]] + abs(data.rs[CER$n.max[1,m],m]-data.rs[CER$n.max[2,m],m])
+      dU[CER$n.min[1,m]] <- dU[CER$n.min[1,m]] + abs(data.rs[CER$n.min[1,m],m]-data.rs[CER$n.min[2,m],m])
+    } # O(M)
+
+    n.opt <- which.max(dU) #O(N.mwe)
+    extreme.obs.inds <- c(extreme.obs.inds, n.opt)
+    n.extr.rows <- n.extr.rows + 1
+
+    # (3) Cleanup & book keeping for the next round
+    rmng.row.arr <- setdiff(rmng.row.arr, n.opt) #O(?)
+
+    for (m in 1:M){
+      if (CER$n.min[1,m] == n.opt){
+        CER$n.min[1,m] = CER$n.min[2,m]
+        CER$r.min[1,m] = CER$r.min[2,m]
+        CER$env.min[m] = data.rs[CER$n.min[1,m],m]
+
+        min.df <- min.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        #Note: rmng.row.arr contains the previous 2nd smallest row -> hence look for 2nd smallest el
+        CER$n.min[2,m] = rmng.row.arr[min.df$ind[2]]
+        CER$r.min[2,m] = min.df$value[2]
+
+      } else if (CER$n.min[2,m] == n.opt){
+        min.df <- min.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        CER$n.min[2,m] = rmng.row.arr[min.df$ind[2]]
+        CER$r.min[2,m] = min.df$value[2]
+
+      } else if (CER$n.max[1,m] == n.opt){
+        CER$n.max[1,m] = CER$n.max[2,m]
+        CER$r.max[1,m] = CER$r.max[2,m]
+        CER$env.max[m] = data.rs[CER$n.max[1,m],m]
+
+        max.df <- max.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        CER$n.max[2,m] = rmng.row.arr[max.df$ind[2]]
+        CER$r.max[2,m] = max.df$value[2]
+
+      } else if (CER$n.max[2,m] == n.opt){
+        max.df <- max.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        CER$n.max[2,m] = rmng.row.arr[max.df$ind[2]]
+        CER$r.max[2,m] = max.df$value[2]
+      }
+    } # O(MN)
+
+    # Check if new test observations have become extreme
+    profile.mat[,k] <- as.integer(row.outside.ci(data.test, CER$env.min, CER$env.max))
+
+    #     debug plot:
+    #     matplot(t(matrix(c(CER$env.min, CER$env.max), byrow=T, nrow=2)), type="l")
+    #     matlines(data.rs[rmng.row.arr,], lty=1, lwd=3, col=rgb(0,0,1,1))
+
+    if (k.max <= k){
+      continue = F # the desired alpha level k/N has been reached
+    }
+
+    k <- k + 1
+  } #of while
+
+  # returns numbers and matches of rows that are _outside_ conf bands at a given k
+  return(list(k.profile = colSums(profile.mat),
+              k.profile.mat = profile.mat))
+}
+
+
+
+
+# An extension of max()
+#
+# Searches for maximum values up to k:th largest value. See k.min() for details.
+max.n.set <- function(x,k){
+  if (k <= 0){ stop("k.min: too small k") }
+  if (length(x) < k){ stop("k.min: too large k") }
+  res <- min.n.set(-x,k)
+  res$value <- -res$value
+  return(res)
+}
+
+max.n <- function(x, n){
+  len <- length(x)
+  if(n > len){
+    warning('N greater than length(x).  Setting N=length(x)')
+    n <- length(x)
+  }
+  sort(x, partial = len-n+1)[len-n+1]
+}
+
+# An extension of min()
+#
+# Searches for minimum values up to k:th smallest value in O(k*N) time.
+#
+# Input:
+# x   (1,N) numeric, Data vector
+# k   (1,1) integer, Up to how far to search
+#
+# Output:
+# res data.frame with k rows and columns:
+#     k: 1 for min, 2 for 2nd smallest, etc. ...
+#     ind: position within x
+#     value: x[ind]
+#     so that x[res$ind] = res$value are the k smallest values, starting with the smallest
+min.n.set <- function(x,k){
+  if (k <= 0){ stop("k.min: too small k") }
+  if (length(x) < k){ stop("k.min: too large k") }
+
+  res <- data.frame()
+  df <- data.frame(ind=1:length(x), value=x)
+  for (i in 1:k){
+    pos <- which.min(df$value)
+    res <- rbind(res, data.frame(k=i, ind=df$ind[pos], value=df$value[pos]))
+    df <- df[-pos,]
+    rm(pos)
+  }
+  return(res)
+}
+
+min.n <- function(x, n){
+  -max.n(-x, n)
+}
+
+
+
+
+
+
 ##########################################################################################
 ## Misc
 ##########################################################################################
@@ -416,7 +665,7 @@ row.outside.ci <- function(data.train, cb.low, cb.high){
   N = nrow(data.train)
   data.out.match <- (data.train < repmat(matrix(cb.low, nrow=1, byrow=T), N, 1)) |
     (repmat(matrix(cb.high, nrow=1, byrow=T), N, 1) < data.train)
-  return(0<rowSums(data.out.match))
+  return(0 < rowSums(data.out.match))
 }
 
 

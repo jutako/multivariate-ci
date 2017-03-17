@@ -35,10 +35,20 @@ mycontain <- cb.violations
 
 # compute profile
 k.max <- floor(alpha * nrow(dmat))
-fp <- fold.profile(mycb, mycontain, dmat, B = 2, k.max = k.max)
 
-pd <- data.frame(k = fp$profile.k, coverage = fp$profile)
-p <- qplot(x = k, y = coverage, data = pd, geom = "point", xlim = c(-1, k.max))
+# generic version - very slow for MWE
+fp1 <- fold.profile(mycb, mycontain, dmat, B = 2, k.max = k.max)
+pd1 <- data.frame(k = fp1$profile.k, coverage = fp1$profile)
+pd1$id <- 'generic'
+
+# MWE specific version - much faster
+fp2 <- mwe.fold.profile(dmat, B = 2, k.max = k.max)
+pd2 <- data.frame(k = fp2$profile.k, coverage = fp2$profile)
+pd2$id <- 'MWE'
+
+pd <- rbind(pd1, pd2)
+p <- qplot(x = k, y = coverage, data = pd, geom = "point", xlim = c(-1, k.max),
+           group = id, color = id)
 p
 
 
