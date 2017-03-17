@@ -405,21 +405,24 @@ mwe.fold.profile <- function(data, B, k.max = floor(0.5*((B-1)/B)*nrow(data)) ){
     } else {
       data.test <- data[fold.idx[b,1]:fold.idx[b,2],]
     }
-    #browser()
+    # profiles according to style a) below:
     B.profiles[b,] <- mwe.k.profile(data[all.idx[-seq(fold.idx[b,1],fold.idx[b,2],1)],],
                                     data.test,
                                     k.max)$k.profile[1:(N-fold.len)] / nrow(data.test)
   }
 
-  # todo: how to average over folds
-  B.profile <- apply(B.profiles, 2, mean, na.rm=T) #coverage: % of rows inside conf band
-  #B.profile <- 1 - colSums(B.profiles, na.rm=T)/N #coverage: % of rows inside conf band
-  #browser()
+  # note: as long as all folds are of equal size it does not matter whether:
+  #   a)  we first compute the "% of observations outside" value per fold and then average over
+  #       folds or
+  #   b)  first sum up all "counts of obs outside" and the divide by total N
+  B.profile <- apply(B.profiles, 2, mean, na.rm=T) # option a), (1 - coverage): % of rows outside conf band
+  #B.profile <- 1 - colSums(B.profiles, na.rm=T)/N # option b), (1 - coverage): % of rows outside conf band
+
   #   plot(B.profile, ylim=c(0,1), type="l")
   #   lines(matrix(c(0,0,245,1),nrow=2,byrow=T))
   #   lines(matrix(c(0,alpha,245,alpha),nrow=2,byrow=T))
   #   browser()
-  return(list(profile = 1 - B.profile,
+  return(list(profile = 1 - B.profile, #report coverage of the band
               profile.mat = B.profiles,
               profile.k = seq(0,length(B.profile)-1,1),
               fold.idx = fold.idx))
