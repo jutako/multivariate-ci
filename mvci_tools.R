@@ -552,8 +552,6 @@ mwe.k.profile <- function(data.rs, data.test, k.max){
 }
 
 
-
-
 # An extension of max()
 #
 # Searches for maximum values up to k:th largest value. See k.min() for details.
@@ -565,6 +563,8 @@ max.n.set <- function(x,k){
   return(res)
 }
 
+# Find n:th largest value of x
+# From: http://stackoverflow.com/questions/2453326/fastest-way-to-find-second-third-highest-lowest-value-in-vector-or-column
 max.n <- function(x, n){
   len <- length(x)
   if(n > len){
@@ -603,13 +603,10 @@ min.n.set <- function(x,k){
   return(res)
 }
 
+# Find n:th smallest value of x
 min.n <- function(x, n){
   -max.n(-x, n)
 }
-
-
-
-
 
 
 ##########################################################################################
