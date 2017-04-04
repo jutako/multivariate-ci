@@ -4,6 +4,10 @@ This repository contains R code to produce some of the figures in manuscript:
 
 "Multivariate confidence intervals": Korpela J., Oikarinen E., Puolamäki K. and Ukkonen A., 2017, Proceedings of the 2017 SIAM International Conference on Data Mining (SDM 2017)
 
+An extended version of the manuscript can be found in arXiv.org:
+
+https://arxiv.org/abs/1701.05763
+
 # Howto
 To quickly see how to compute confidence bands see `howto.R`. It also shows which files should be `source()`:d for things to work.
 
