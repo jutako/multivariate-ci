@@ -1,9 +1,15 @@
-Package: tmp
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Package: mvci
+Title: Construct Multivariate Confidence Intervals
+Version: 0.0.0.1
+Authors@R: person("Jussi", "Korpela", email = "jussi.korpela@iki.fi", role = c("aut", "cre"))
+Author: Jussi Korpela [aut, cre], Finnish Institute of Occupational Health [cph]
+Maintainer: Jussi Korpela <jussi.korpela@iki.fi>
+Description: Computation and visualization of multivariate confidence bands for vector valued (functional) data
 Depends: R (>= 3.4.2)
-License: What license is it under?
+Imports: ggplot2
+License: MIT + file LICENSE
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1

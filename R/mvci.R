@@ -7,7 +7,17 @@
 
 
 #' Greedy methods to find MVCIs
+#'
+#'@description
 #' A wrapper to call different methods with different initializations
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param k [1,1] integer, Number of observations (rows) to remove
+#' @param l [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#'
+#' @return A list describing the multivariate confidence band.
+#'
+#' @export
 mvci_greedy <- function(dmat, k, l, method='bottomup_byrow'){
   N <- nrow(dmat)
   
@@ -29,6 +39,18 @@ mvci_greedy <- function(dmat, k, l, method='bottomup_byrow'){
 
 
 #' Bottom-up method that adds full rows of data
+#'
+#'@description
+#' Find MVCI using a bottom up greedy algorithm.
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param k [1,1] integer, Number of observations (rows) to remove
+#' @param l [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#' @param ciSeedInds [1,J] integer, Row indices of rows that should be used as seed. Typically the median.
+#'
+#' @return A list describing the multivariate confidence band.
+#'
+#' @export
 findcb_bottomup_byrow <- function(dmat, k, l, ciSeedInds){
   
   N <- nrow(dmat)
@@ -81,7 +103,18 @@ findcb_bottomup_byrow <- function(dmat, k, l, ciSeedInds){
 }
 
 
+
 #' Identify rows that are inside/outside confidence band based on Z
+#'
+#' @description
+#' Identify rows that lie completely within the mvci using mvci$Z
+#'
+#' @param Z [N,M] logical, Output of some mvci method, mvci$Z 
+#' @param type char {'inside', 'outside'}, inside -> rows completely TODO
+#'
+#' @return [N,1] logical, A logical vector indicating rows that match 'type'
+#'
+#' @export
 getRows <- function(Z, type){
   switch(type,
          inside = (rowSums(Z) != 0),
@@ -90,6 +123,16 @@ getRows <- function(Z, type){
 
 
 #' Initial creation of the envelope mask data structure
+#'
+#'@description
+#' Create mvci envelope masks
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param Z [N,M] logical, Output of some mvci method, mvci$Z 
+#' 
+#' @return A list with mvci envelope masks.
+#'
+#' @keywords internal
 createEnvelopeMasks <- function(dmat, Z){
   upmask = matrix(F, nrow = nrow(Z), ncol = ncol(Z))
   downmask = matrix(F, nrow = nrow(Z), ncol = ncol(Z))
@@ -122,7 +165,18 @@ createEnvelopeMasks <- function(dmat, Z){
 # }
 
 
-#' Update of the envelope mask data structure by adding a new row
+#' Update mvci envelope mask
+#'
+#' @description
+#' Update the mvci envelope mask data structure by adding a new row
+#'
+#' @param mvci list, mvci result list 
+#' @param rowInd integer, Index of the row to add
+#' @param pointDF data.frame, Data point data.frame
+#' 
+#' @return An updated mvci list
+#'
+#' @keywords internal
 updateEnvelopeMasks <- function(mvci, rowInd, pointDF){
   
   pdfs <- subset(pointDF, isover)
@@ -142,7 +196,16 @@ updateEnvelopeMasks <- function(mvci, rowInd, pointDF){
 
 
 #' Get confidence band (envelope) based on Z matrix
-#' Not used much since envelope masks are easier to use 
+#'
+#'@description
+#' Not used much since envelope masks are easier to use
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param Z [N,M] logical, Output of some mvci method, mvci$Z
+#' 
+#' @return A list with two vectors indicating values of mvci for each dimension
+#'
+#' @export 
 getEnvelope <- function(dmat, Z){
   out <- list(down = vector(mode = 'double', length = dim(dmat)[[2]]),
               up = vector(mode = 'double', length = dim(dmat)[[2]]) )
@@ -155,7 +218,17 @@ getEnvelope <- function(dmat, Z){
   out
 }
 
+
 #' Get confidence band (envelope) based on row indices
+#' 
+#'@description
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param rowinds [] interger, TODO
+#' 
+#' @return A list with two vectors indicating values of mvci for each dimension
+#' 
+#' @export 
 getEnvelopeRow <- function(dmat, rowinds){
   list( down = apply(dmat[rowinds,, drop = F], 2, min),
         up =   apply(dmat[rowinds,, drop = F], 2, max) )
@@ -177,7 +250,17 @@ getEnvelopeRow <- function(dmat, rowinds){
 
 
 #' Find points on a row that lie outside confidence band
+#' 
+#' @description
 #' Report each point along with associated costs
+#'
+#' @param rowind integer, A row index
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param mvci list, mvci result list 
+#' 
+#' @return A data.frame with colum indices, $isover and cost
+#' 
+#' @keywords internal
 points_outside_ci <- function(rowind, dmat, mvci){
   
   upArr <- dmat[mvci$upmask] 
@@ -198,11 +281,94 @@ points_outside_ci <- function(rowind, dmat, mvci){
 }
 
 
+
+
+#'  Greedy top-down multivariate confidence interval (mvci)
+#'  
+#' @description
+#' Manuscript algorithm 1: Greedy
+#' 
+#' Algorithm:
+#'  do k times:
+#'    1. solve k = 0, l > 0 to get CB
+#'    2. decide wich row to remove and remove it
+#'  For the N-k row remaining rows, solve k = 0, l > 0 to get CB.
+#'  
+#'  Output:
+#'    Z [N, M] logical, indicates included points/rows
+#'    upmask, downmask [N, M] logical, indicates positions of CB border, one TRUE per column
+#'    row.inc.idx [1:(N-K)] integer, Indices of rows that are within CB
+#'    row.exc.idx [1:K] integer,  Indices of rows that are outside CB
+#'    L, K Input parameters for documentation
+#'    
+#' TODO: Tries to process insane inputs such as L>M
+#'
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param K [1,1] integer, Number of observations (rows) to remove
+#' @param L [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#' @param verbose logical, Verbosity of output
+#'
+#' @return A list describing the multivariate confidence band.
+#'
+#' @export
+findcb_topdown <- function(dmat, K, L, verbose = F){ #(K(M^2logM + NlogN))
+  
+  N <- nrow(dmat) #observations / time
+  M <- ncol(dmat) #variables
+  
+  
+  row.inc.idx <- 1:N # indices of rows within confidence band
+  
+  # Greedily remove rows (i.e. observations) K -times
+  if (K > 0){
+    for (k in 1:K){#O(K)
+      if (verbose){ cat(sprintf('Searching for row %d/%d to remove ...\n', k, K)) }
+      
+      cb <- remove_points_cb(dmat[row.inc.idx,], L) #O(M^2logM)
+      costs <- collect_costs(dmat[row.inc.idx,], cb$d.order) #O(M)
+      maxind <- which.max(costs$cost) #O(NlogN)
+      row.inc.idx <- row.inc.idx[-maxind]
+      
+    }
+  }
+  
+  # Compute CB using the L-criterion for the remaining rows
+  cb <- remove_points_cb(dmat[row.inc.idx,], L)
+
+  # Create outputs
+  Z <- matrix(F, nrow = N, ncol = M)
+  Z[row.inc.idx,] <- cb$Z
+  
+  downmask <- matrix(F, nrow = N, ncol = M)
+  downmask[row.inc.idx,] <- cb$downmask
+  
+  upmask <- matrix(F, nrow = N, ncol = M)
+  upmask[row.inc.idx,] <- cb$upmask
+   
+  list(Z = Z,
+       upmask = upmask,
+       downmask = downmask,
+       row.inc.idx = row.inc.idx,
+       row.exc.idx = setdiff(1:N, row.inc.idx),
+       L = L,
+       K = K)
+}
+
+
+#' Minimize envelope for k=0, l>0 (sub-step of findcb_topdown())
+#' 
+#' @description
 #' Solve problem k = 0, l > 0 by greedily removing points starting from the
-#' whole data envelope
+#' whole data envelope.
 #' To be used as a substep of the greedy top-down approach
 #' Manuscript algorithm 2: FindEnvelope(X, I, L)
 #' 
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param l [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#'
+#' @return A list describing the multivariate confidence band.
+#'
+#' @keywords internal
 remove_points_cb <- function(dmat, l){ #O(M^2logM)
   
   N <- nrow(dmat)
@@ -222,7 +388,7 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
   for (m in 1:M){ #O(M)
     d.order[[m]] <- order(dmat[,m])
   }
-
+  
   # record of points removed
   # d.removed.count is a N element integer vector keeping track of points
   # from each row of Z
@@ -241,10 +407,10 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
     d.gains$islow[ind] <- T
     
     d.gains$gain[ind+1] <-  dmat[tail(d.order[[m]],1), m] - 
-                            dmat[tail(d.order[[m]],2)[1], m]
+      dmat[tail(d.order[[m]],2)[1], m]
     d.gains$col[ind+1] <- m
     d.gains$islow[ind+1] <- F
-
+    
     ind <- ind + 2
   }
   
@@ -290,8 +456,8 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
           if (cislow){
             d.order[[ccol]] <- d.order[[ccol]][-1] #pop first
             d.gains$gain[tmpidx] <- dmat[d.order[[ccol]][2], ccol] - 
-                                    dmat[d.order[[ccol]][1], ccol]  
-   
+              dmat[d.order[[ccol]][1], ccol]  
+            
             
           } else {
             d.order[[ccol]] <- d.order[[ccol]][-length(d.order[[ccol]])] #pop last
@@ -305,7 +471,7 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
       }
       
     }
-      
+    
   }# of while
   
   # Create outputs
@@ -320,71 +486,18 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
 }
 
 
-#' Find CB using a greedy top-down approach
+#' Collect boundary row costs (sub-step of findcb_topdown())
 #' 
-#' Manuscript algorithm 1: Greedy
-#' 
-#' Algorithm:
-#'  do k times:
-#'    1. solve k = 0, l > 0 to get CB
-#'    2. decide wich row to remove and remove it
-#'  For the N-k row remaining rows, solve k = 0, l > 0 to get CB.
-#'  
-#'  Output:
-#'    Z [N, M] logical, indicates included points/rows
-#'    upmask, downmask [N, M] logical, indicates positions of CB border, one TRUE per column
-#'    row.inc.idx [1:(N-K)] integer, Indices of rows that are within CB
-#'    row.exc.idx [1:K] integer,  Indices of rows that are outside CB
-#'    L, K Input parameters for documentation
-#'    
-#'  TODO: Tries to process insane inputs such as L>M
-#'  
-findcb_topdown <- function(dmat, K, L, verbose = F){ #(K(M^2logM + NlogN))
-  
-  N <- nrow(dmat) #observations / time
-  M <- ncol(dmat) #variables
-  
-  
-  row.inc.idx <- 1:N # indices of rows within confidence band
-  
-  # Greedily remove rows (i.e. observations) K -times
-  if (K > 0){
-    for (k in 1:K){#O(K)
-      if (verbose){ cat(sprintf('Searching for row %d/%d to remove ...\n', k, K)) }
-      
-      cb <- remove_points_cb(dmat[row.inc.idx,], L) #O(M^2logM)
-      costs <- collect_costs(dmat[row.inc.idx,], cb$d.order) #O(M)
-      maxind <- which.max(costs$cost) #O(NlogN)
-      row.inc.idx <- row.inc.idx[-maxind]
-      
-    }
-  }
-  
-  # Compute CB using the L-criterion for the remaining rows
-  cb <- remove_points_cb(dmat[row.inc.idx,], L)
-
-  # Create outputs
-  Z <- matrix(F, nrow = N, ncol = M)
-  Z[row.inc.idx,] <- cb$Z
-  
-  downmask <- matrix(F, nrow = N, ncol = M)
-  downmask[row.inc.idx,] <- cb$downmask
-  
-  upmask <- matrix(F, nrow = N, ncol = M)
-  upmask[row.inc.idx,] <- cb$upmask
-   
-  list(Z = Z,
-       upmask = upmask,
-       downmask = downmask,
-       row.inc.idx = row.inc.idx,
-       row.exc.idx = setdiff(1:N, row.inc.idx),
-       L = L,
-       K = K)
-}
-
-
+#' @description
 #' Collect costs attainable from rows that lie at the envelope boundary
-#' Uses d.order structure to specify points at the border 
+#' Uses d.order structure to specify points at the border
+#' 
+#' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows, 
+#' @param d.order TODO
+#'
+#' @return A data.frame with costs for each row of data
+#'
+#' @keywords internal
 collect_costs <- function(dmat, d.order){ #O(M)
   N <- nrow(dmat)
   M <- ncol(dmat)
