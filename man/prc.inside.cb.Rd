@@ -22,7 +22,7 @@ prc.inside.cb(cbfun, X_train, X_test, L)
 [1,1] numeric, percentage of observations in X_test that are within the mvci produced by X_train
 }
 \description{
-TODO: L or l, cb or mvci, K or k, etc.
+
 }
 \details{
 #' Does vector x violate cb with criterion L

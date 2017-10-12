@@ -164,7 +164,6 @@ row.outside.ci <- function(data.train, cb.low, cb.high){
 #' Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test
 #'
 #' @description
-#' TODO: L or l, cb or mvci, K or k, etc.
 #'
 #' @param cbfun function, Function to compute mvci with, should take only X_train as input
 #' @param X_train [N0,M] numeric matrix, Training data, N samples, M variables.

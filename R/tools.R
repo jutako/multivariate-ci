@@ -1,7 +1,15 @@
 
-# An extension of max()
-#
-# Searches for maximum values up to k:th largest value. See k.min() for details.
+#' k largest values of x (an extension of base::max())
+#'
+#' @description
+#' Searches for maximum values up to k:th largest value. See k.min() for details.
+#'
+#' @param x (1,N) numeric, Data vector
+#' @param k (1,1) integer, Up to how far to search
+#'
+#' @return [1,J] A data.frame with information on the k largest values of x. See k.min() for details.
+#'
+#' @export
 max.n.set <- function(x,k){
   if (k <= 0){ stop("k.min: too small k") }
   if (length(x) < k){ stop("k.min: too large k") }
@@ -23,20 +31,21 @@ max.n <- function(x, n){
 }
 
 
-# An extension of min()
-#
-# Searches for minimum values up to k:th smallest value in O(k*N) time.
-#
-# Input:
-# x   (1,N) numeric, Data vector
-# k   (1,1) integer, Up to how far to search
-#
-# Output:
-# res data.frame with k rows and columns:
-#     k: 1 for min, 2 for 2nd smallest, etc. ...
-#     ind: position within x
-#     value: x[ind]
-#     so that x[res$ind] = res$value are the k smallest values, starting with the smallest
+#' k smallest values of x (an extension of base::min())
+#'
+#' @description
+#' Searches for minimum values up to k:th smallest value in O(k*N) time.
+#'
+#' @param x (1,N) numeric, Data vector
+#' @param k (1,1) integer, Up to how far to search
+#'
+#' @return A data.frame with k rows and columns:
+#' \item{k}{1 for min, 2 for 2nd smallest, etc. ...}
+#' \item{ind}{position within x}
+#' \item{value}{x[ind]}
+#' so that x[res$ind] = res$value are the k smallest values, starting with the smallest.
+#'
+#' @export
 min.n.set <- function(x,k){
   if (k <= 0){ stop("k.min: too small k") }
   if (length(x) < k){ stop("k.min: too large k") }
