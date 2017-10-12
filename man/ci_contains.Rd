@@ -2,9 +2,19 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{ci_contains}
 \alias{ci_contains}
-\title{Returns TRUE if ci contains x with respect to relaxation l and FALSE otherwise}
+\title{Does ci contain x with respect to l?}
 \usage{
 ci_contains(ci, x, l)
+}
+\arguments{
+\item{ci}{list, A list with upper and lower mvci boundary.}
+
+\item{x}{[M,1] numeric, A data vector}
+
+\item{l}{[1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI}
+}
+\value{
+logical, True if x violates ci <= l times. False if x violates ci more than l times.
 }
 \description{
 Returns TRUE if ci contains x with respect to relaxation l and FALSE otherwise

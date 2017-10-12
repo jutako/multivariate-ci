@@ -2,11 +2,20 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{smallest_ci}
 \alias{smallest_ci}
-\title{Mininum width quantile CI for a vector of data
-Returns (1 - k/length(x)) * 100% CI for a data vector using minimum width quantiles}
+\title{Mininum width confidence interval for a data vector}
 \usage{
 smallest_ci(x, k)
 }
+\arguments{
+\item{k}{[1,1] integer, Number of observations to leave outside the interval}
+
+\item{c}{[M,1] numeric, A data vector}
+}
+\value{
+A list with upper and lower mvci boundary.
+TODO: return value differs from that of other methods.
+}
 \description{
-todo: same as min_width_quantile()
+Returns (1 - k/length(x)) * 100% CI for a data vector using minimum width quantiles
+TODO: same as min_width_quantile()
 }

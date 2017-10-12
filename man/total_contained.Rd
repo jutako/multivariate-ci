@@ -2,12 +2,21 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{total_contained}
 \alias{total_contained}
-\title{Returns the number of rows in matrix X that are within ci with respect
-to relaxation l}
+\title{How many rows of X are inside ci with respect to l?}
 \usage{
 total_contained(ci, X, l)
 }
+\arguments{
+\item{ci}{list, A list with upper and lower mvci boundary.}
+
+\item{X}{[M,N] numeric, Data matrix with vector valued M-dimensional observations on rows}
+
+\item{l}{[1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI}
+}
+\value{
+integer, Number of rows of X that are inside ci
+}
 \description{
 Returns the number of rows in matrix X that are within ci with respect
-to relaxation l
+to relaxation l.
 }

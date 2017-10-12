@@ -247,3 +247,116 @@ toyplot <- function(dmat, cb_naive, cbm0, cbml){
 
 }
 
+
+
+#' Experiment 1: Compute Pr[V(x|x_u,x_l)<=L] for various value of L, N_train and B
+#'
+run.exp1 <- function(cbfun, X_train, X_test, N.train.arr, M.arr, K.prc, L.arr, B){
+
+  N <- nrow(X_train)
+  M <- ncol(X_train)
+
+  #   nres <- length(N.train.arr)* length(M.arr)* length(L.arr) * B
+  #   resdf <- data.frame(Ntr = vector('integer', nres),
+  #                       M = vector('integer', nres),
+  #                       K = vector('integer', nres),
+  #                       L = vector('integer', nres),
+  #                       B = vector('integer', nres),
+  #                       prc.in.cbf = vector('numeric', nres),
+  #                       prc.in.env = vector('numeric', nres))
+
+  require('foreach')
+  options(cores = 3)
+
+  res <- foreach (l = L.arr, .combine = rbind) %dopar% {
+    #l <- L.arr[lidx]
+    ind <- 1
+    nres <- length(N.train.arr)* length(M.arr) * B
+    resdf <- data.frame(Ntr = vector('integer', nres),
+                        M = vector('integer', nres),
+                        K = vector('integer', nres),
+                        L = vector('integer', nres),
+                        B = vector('integer', nres),
+                        prc.in.cbf = vector('numeric', nres),
+                        prc.in.env = vector('numeric', nres))
+    for (ntr in N.train.arr){
+      for (m in M.arr){
+        #cat(sprintf('L:%d, ntr: %d, m: %d - bootstrapping ... \n', l, ntr, m))
+
+        k <- floor(K.prc * ntr)
+        cbtmpf <- function(X){cbfun(X, K = k, L = l)}
+        cidx <- 1:m
+
+        # bootstrap
+        for (b in 1:B){
+          ridx <- sample(1:N, ntr, replace = F)
+          resdf[ind,] <- data.frame(Ntr = ntr, M = m, K = k, L = l, B = b,
+                                    prc.in.cbf = prc.inside.cb(cbtmpf, X_train[ridx, cidx], X_test[,cidx], l),
+                                    prc.in.env = prc.inside.cb(cb.envelope, X_train[ridx, cidx], X_test[,cidx], l) )
+          ind <- ind + 1
+        }
+
+        #         bres <- foreach (b = 1:B, .combine = rbind) %do% {
+        #           ridx <- sample(1:N, ntr, replace = F)
+        #
+        #           data.frame(Ntr = ntr, M = m, K = k, L = l, B = b,
+        #                      prc.in.cbf = prc.inside.cb(cbtmpf, X_train[ridx, cidx], X_test[,cidx], l),
+        #                      prc.in.env = prc.inside.cb(cb.envelope, X_train[ridx, cidx], X_test[,cidx], l) )
+        #         }
+        #         resdf[ind:(ind+B-1),] <- bres
+        #         ind = ind + B
+      } #m
+    } #ntr
+
+    resdf
+  }#l
+
+  res
+}
+
+
+cb_area_test_loader <- function(path,
+                                ks = c( 20, 40, 80, 120 ),
+                                ls = ls <- c( 0, 1, 2, 5, 10, 20, 50, 100, 600)) {
+
+  foo <- c()
+  for ( k in ks ) {
+    for ( l in ls ) {
+      fname <- sprintf( '%s/stockdata_rawzero_K%d_L%d.rds', path, k, l )
+      cb <- readRDS( fname )
+      foo <- rbind( foo, c( k, l, cb_area( cb ) ) )
+    }
+  }
+  foo <- as.data.frame( foo )
+  names(foo) <- c('K', 'L', 'A')
+  foo
+}
+
+
+
+## call cb_area_test_loader first, give return value as argument to this fnc
+cb_area_test <- function( areas ) {
+  ks <- unique( areas$K )
+
+  quartz( height=7, width=14 )
+  par( mfrow=c(1,2) )
+
+  plot( NA, xlim=c(min(areas$L), max(areas$L)), ylim=c(min(areas$A),max(areas$A)),
+        xlab='L', ylab='Area', main='Area as function of L for K in (20,40,80,100)' )
+  colors <- c('red', 'green', 'blue', 'magenta', 'cyan')
+  for ( i in 1:length(ks) ) {
+    k <- ks[i]
+    d <- subset( areas, K==k )
+    lines( d$L, d$A, col=colors[i], type='b' )
+  }
+
+  plot( NA, xlim=c(min(areas$L), max(areas$L)), ylim=c(0.85,1),
+        xlab='L', ylab='area/areaL0',
+        main='Reduction in area wrt area of L=0')
+  for( i in 1:length(ks) ) {
+    k <- ks[i]
+    d <- subset( areas, K==k )
+    d$A <- d$A/d$A[1]
+    lines( d$L, d$A, col=colors[i], type='b' )
+  }
+}

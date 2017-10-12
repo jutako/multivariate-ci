@@ -2,12 +2,24 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{mvci_min_width_quantile}
 \alias{mvci_min_width_quantile}
-\title{Computes minimum width quantile CI separately for each column of matrix X i.e.
-separately for each variable}
+\title{Adjusted naive quantile based multivariate confidence interval (mvci)}
 \usage{
 mvci_min_width_quantile(X, k, l)
 }
+\arguments{
+\item{X}{[N,M] numeric, Data matrix, vector valued M-dimensional observations on rows,}
+
+\item{k}{[1,1] integer, Number of observations (rows) to remove}
+
+\item{l}{[1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI}
+}
+\value{
+A list describing the multivariate confidence band.
+}
 \description{
+Computes minimum width quantile CI separately for each column of matrix X i.e.
+separately for each variable
+
 Adjusts the number of observations to exclude (i.e. the percentage a in function
 f()) such that the total number of rows insice the confidence area mathces n-k
 }

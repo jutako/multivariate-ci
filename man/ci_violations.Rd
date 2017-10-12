@@ -2,10 +2,18 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{ci_violations}
 \alias{ci_violations}
-\title{Returns the number of points in which x lies outside ci}
+\title{Number of ci violations of x}
 \usage{
 ci_violations(ci, x)
 }
+\arguments{
+\item{ci}{list, A list with upper and lower mvci boundary.}
+
+\item{x}{[M,1] numeric, A data vector}
+}
+\value{
+integer, Number of values in x that are outside ci.
+}
 \description{
-Returns the number of points in which x lies outside ci
+Returns the number of points in which a vector x lies outside ci
 }

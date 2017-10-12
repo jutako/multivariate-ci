@@ -2,10 +2,21 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{get_ci}
 \alias{get_ci}
-\title{Mininum width quantile (1-a)*100% CI for a data matrix}
+\title{Naive quantile based multivariate confidence interval (mvci)}
 \usage{
-get_ci(X, a)
+get_ci(X, alpha)
+}
+\arguments{
+\item{X}{[N,M] numeric, Data, vector valued M-dimensional observations on rows,}
+
+\item{alpha}{[1,1] numeric, Percentage of observations to leave outside the interval per dimension}
+}
+\value{
+A list with upper and lower mvci boundary.
+TODO: return value differs from that of other methods.
 }
 \description{
-Applies smallest_ci() to each column of X
+Mininum width quantile (1-a)*100% CI for a data matrix.
+Applies smallest_ci() to each column of X.
+Does not control FWER over multiple dimensions like mvci_min_width_quantile().
 }
