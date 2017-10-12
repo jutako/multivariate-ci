@@ -17,6 +17,8 @@
 #' @param k [1,1] int, Number of values to exclude
 #'
 #' @return [1,2] numeric, The endpoints [min, max] of the quantile
+#'
+#' @export
 min_width_quantile <- function(x, k) {
   n <- length(x)
   x <- sort(x)
@@ -35,6 +37,8 @@ min_width_quantile <- function(x, k) {
 #' @param k [1,1] int, Number of values to exclude
 #'
 #' @return [1,2] numeric, The endpoints [min, max] of the quantile
+#'
+#' @export
 central_quantile <- function(x, k){
   n <- length(x)
   x <- sort(x)
@@ -65,6 +69,8 @@ central_quantile <- function(x, k){
 #' \item{$k:}{[1,1] integer, the input k for reference}
 #' \item{$quantile.fun:}{function, the input quantile.fun for reference}
 #' \item{$wall_time_taken:}{[1,1] double, Time taken to find the result, in seconds}
+#'
+#' @export
 cb_quantile <- function(dmat, k, quantile.fun = min_width_quantile){
   start_time <- Sys.time()
 
@@ -77,22 +83,23 @@ cb_quantile <- function(dmat, k, quantile.fun = min_width_quantile){
 }
 
 
-
 ##########################################################################################
 ## Misc
 ##########################################################################################
 
-## Observation envelope and related statistics
-#
-# Inputs:
-#   data  [N,M] numeric matrix, N samples, M variables/dimensions.
-#
-# Outputs:
-#   list  envelope    [2,M] matrix, lower (row 1) and upper (row 2) envelopes
-#         sum.width   [1,1] numeric, Envelope width (sum of widths over the M dimensions)
-#         mean.width  [1,1] numeric, Mean envelope width (mean of widths over the M dimensions)
-#         min/max     you get it...
-#
+#' Data envelope and related statistics
+#'
+#' @description
+#'
+#' @param data  [N,M] numeric matrix, N samples, M variables/dimensions.
+#'
+#' @return A list with elements:
+#' \item{envelope}{[2,M] matrix, lower (row 1) and upper (row 2) envelopes}
+#' \item{sum.width}{[1,1] numeric, Envelope width (sum of widths over the M dimensions)}
+#' \item{mean.width}{[1,1] numeric, Mean envelope width (mean of widths over the M dimensions)}
+#' \item{min/max}{you get it...}
+#'
+#' @export
 cb.envelope <- function(data){
   N <- nrow(data)
   M <- ncol(data)
@@ -119,13 +126,17 @@ cb.envelope <- function(data){
 }
 
 
-# Find observations that are outside confidence intervals in at least one variable
-#
-# Inputs:
-#   data.train   (n,m) numeric matrix, n samples, m variables. The samples define the empirical cdfs of the m variables.
-#             Variables correspond to multiple hypotheses.
-#   cb.low    (1,m) numeric vector, lower CI limit for each of the dimensions
-#   cb.high   (1,m) numeric vector, upper CI limit for each of the dimensions
+#' Find observations that are outside confidence intervals in at least one variable
+#'
+#' @description
+#'
+#' @param data.train (n,m) numeric matrix, n samples, m variables. The samples define the empirical cdfs of the m variables. Variables correspond to multiple hypotheses.
+#' @param cb.low (1,m) numeric vector, lower CI limit for each of the dimensions
+#' @param cb.high (1,m) numeric vector, upper CI limit for each of the dimensions
+#'
+#' @return [M,1] logical, True if the observation (row) exits the mvci
+#'
+#' @export
 row.outside.ci <- function(data.train, cb.low, cb.high){
   N = nrow(data.train)
   data.out.match <- (data.train < repmat(matrix(cb.low, nrow=1, byrow=T), N, 1)) |
@@ -152,13 +163,25 @@ row.outside.ci <- function(data.train, cb.low, cb.high){
 
 #' Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test
 #'
+#' @description
+#' TODO: L or l, cb or mvci, K or k, etc.
+#'
+#' @param cbfun function, Function to compute mvci with, should take only X_train as input
+#' @param X_train [N0,M] numeric matrix, Training data, N samples, M variables.
+#' @param X_test [N1,M] numeric matrix, Test data, N samples, M variables.
+#' @param L [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#'
+#' @return [1,1] numeric, percentage of observations in X_test that are within the mvci produced by X_train
+#'
+#' @export
 prc.inside.cb <- function(cbfun, X_train, X_test, L){
 
-# cbfun <- findcb_topdown
-# X_train <- makeX(100, 20)
-# X_test <- makeX(100, 20)
-# K = 5
-# L = 1
+  # debug:
+  # cbfun <- findcb_topdown
+  # X_train <- makeX(100, 20)
+  # X_test <- makeX(100, 20)
+  # K = 5
+  # L = 1
 
   cb <- cbfun(X_train)
   in.count <- sum(apply( X_test, 1,
@@ -167,6 +190,15 @@ prc.inside.cb <- function(cbfun, X_train, X_test, L){
 }
 
 
+#' Width of the mvci
+#'
+#' @description
+#'
+#' @param cb list, mvci specifications produced by one of the mvci functions
+#'
+#' @return [1,1] numeric, Width of the mvci (the MWE target cost criterion)
+#'
+#' @export
 cb_area <- function( cb ) {
   ciup   <- cb$data[cb$upmask]
   cidown <- cb$data[cb$downmask]

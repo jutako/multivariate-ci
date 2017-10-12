@@ -26,13 +26,13 @@ Algorithm:
    1. solve k = 0, l > 0 to get CB
    2. decide wich row to remove and remove it
  For the N-k row remaining rows, solve k = 0, l > 0 to get CB.
- 
+
  Output:
    Z [N, M] logical, indicates included points/rows
    upmask, downmask [N, M] logical, indicates positions of CB border, one TRUE per column
    row.inc.idx [1:(N-K)] integer, Indices of rows that are within CB
    row.exc.idx [1:K] integer,  Indices of rows that are outside CB
    L, K Input parameters for documentation
-   
+
 TODO: Tries to process insane inputs such as L>M
 }

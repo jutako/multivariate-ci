@@ -2,7 +2,8 @@
 % Please edit documentation in R/mvci_tools.R
 \name{min_width_quantile}
 \alias{min_width_quantile}
-\title{Find shortest interval quantiles}
+\title{Other multivariate confidence intervals and related tools
+Find shortest interval quantiles}
 \usage{
 min_width_quantile(x, k)
 }

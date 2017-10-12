@@ -2,10 +2,37 @@
 % Please edit documentation in R/mvci_tools.R
 \name{prc.inside.cb}
 \alias{prc.inside.cb}
-\title{Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test}
+\title{#' Count of cb violations in vector x
+cb.violations <- function( x, cb.low, cb.high ) {
+  sum( sapply( 1:length(cb.high), function(i) cb.low[i] > x[i] || cb.high[i] < x[i] ) )
+}}
 \usage{
 prc.inside.cb(cbfun, X_train, X_test, L)
 }
+\arguments{
+\item{cbfun}{function, Function to compute mvci with, should take only X_train as input}
+
+\item{X_train}{[N0,M] numeric matrix, Training data, N samples, M variables.}
+
+\item{X_test}{[N1,M] numeric matrix, Test data, N samples, M variables.}
+
+\item{L}{[1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI}
+}
+\value{
+[1,1] numeric, percentage of observations in X_test that are within the mvci produced by X_train
+}
 \description{
+TODO: L or l, cb or mvci, K or k, etc.
+}
+\details{
+#' Does vector x violate cb with criterion L
+cb.contains <- function( x, cb.low, cb.high, L ) {
+  cb.violations( x, cb.low, cb.high ) <= L
+}
+
+#' Total number of rows in X that do not violate cb
+total.contained <- function( X, cb.low, cb.high, L ) {
+  sum( apply( X, 1, function(x) cb.contains( x, cb.low, cb.high, L ) ) )
+}
 Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test
 }

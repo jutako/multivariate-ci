@@ -2,9 +2,11 @@
 % Please edit documentation in R/mvci.R
 \name{mvci_greedy}
 \alias{mvci_greedy}
-\title{Greedy heuristics for computing Multivariate 
-Confidence Intervals (MVCI)
-Greedy methods to find MVCIs}
+\title{Greedy heuristics for computing MultiVariate Confidence Intervals (MVCI)
+bottom-up
+top-down
+Greedy methods to find MVCIs
+TODO: contains oly bottom-up, not the more frequent top-dowm}
 \usage{
 mvci_greedy(dmat, k, l, method = "bottomup_byrow")
 }
