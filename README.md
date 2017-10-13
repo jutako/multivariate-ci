@@ -41,3 +41,6 @@ experiments/custom_plots.R | Custom plotting functions
 experiments/motivating_example.R | Code to reproduce manuscript Fig 1
 experiments/stock_example.R | Code to reproduce manuscript Fig 5
 run.R | A script to source() all needed files and run code that produces some of the figures into `./figs/`.
+
+# Future
+A proper R package is under construction: see branch `to-R-package`.
