@@ -4,8 +4,8 @@ Version: 0.0.0.1
 Authors@R: person("Jussi", "Korpela", email = "jussi.korpela@iki.fi", role = c("aut", "cre"))
 Author: Jussi Korpela [aut, cre], Finnish Institute of Occupational Health [cph]
 Maintainer: Jussi Korpela <jussi.korpela@iki.fi>
-Description: Computation and visualization of multivariate confidence bands for vector valued (functional) data
-Depends: R (>= 3.4.2)
+Description: Computation and visualization of multivariate confidence bands for vector valued (functional) data. 
+Depends: R (>= 3.3.3)
 Imports: ggplot2
 License: MIT + file LICENSE
 Suggests: knitr, rmarkdown

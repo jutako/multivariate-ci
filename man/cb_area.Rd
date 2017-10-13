@@ -13,5 +13,5 @@ cb_area(cb)
 [1,1] numeric, Width of the mvci (the MWE target cost criterion)
 }
 \description{
-
+Width of the mvci
 }

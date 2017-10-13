@@ -21,5 +21,5 @@ Computes minimum width quantile CI separately for each column of matrix X i.e.
 separately for each variable
 
 Adjusts the number of observations to exclude (i.e. the percentage a in function
-f()) such that the total number of rows insice the confidence area mathces n-k
+f()) such that the total number of rows inside the confidence area matches n-k
 }

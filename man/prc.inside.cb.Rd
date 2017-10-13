@@ -2,10 +2,7 @@
 % Please edit documentation in R/mvci_tools.R
 \name{prc.inside.cb}
 \alias{prc.inside.cb}
-\title{#' Count of cb violations in vector x
-cb.violations <- function( x, cb.low, cb.high ) {
-  sum( sapply( 1:length(cb.high), function(i) cb.low[i] > x[i] || cb.high[i] < x[i] ) )
-}}
+\title{Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test}
 \usage{
 prc.inside.cb(cbfun, X_train, X_test, L)
 }
@@ -22,17 +19,5 @@ prc.inside.cb(cbfun, X_train, X_test, L)
 [1,1] numeric, percentage of observations in X_test that are within the mvci produced by X_train
 }
 \description{
-
-}
-\details{
-#' Does vector x violate cb with criterion L
-cb.contains <- function( x, cb.low, cb.high, L ) {
-  cb.violations( x, cb.low, cb.high ) <= L
-}
-
-#' Total number of rows in X that do not violate cb
-total.contained <- function( X, cb.low, cb.high, L ) {
-  sum( apply( X, 1, function(x) cb.contains( x, cb.low, cb.high, L ) ) )
-}
 Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test
 }

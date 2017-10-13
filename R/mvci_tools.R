@@ -11,7 +11,7 @@
 #' shortest width.
 #'
 #' Note: If the distribution of x is uniform, e.g. x = 1:N, or otherwise there are
-#' sevaral shortest intervals then the first is returned, in this example 1:(N-k).
+#' several shortest intervals then the first is returned, in this example 1:(N-k).
 #'
 #' @param x [1,N] numeric, A 1D data vector
 #' @param k [1,1] int, Number of values to exclude
@@ -62,7 +62,7 @@ central_quantile <- function(x, k){
 #' @param quantile.fun function, A function to compute the 1D quantiles with,
 #'          defaults to min_width_quantile()
 #'          Should accept two arguments: a data vector x and number of observations to
-#'          exluce k. See min_width_quantile() and central_quantile() for examples.
+#'          exclude k. See min_width_quantile() and central_quantile() for examples.
 #'
 #' @return A list with elements:
 #' \item{$cb:}{[2,M] numeric array containing the lower and upper confidence band}
@@ -88,8 +88,6 @@ cb_quantile <- function(dmat, k, quantile.fun = min_width_quantile){
 ##########################################################################################
 
 #' Data envelope and related statistics
-#'
-#' @description
 #'
 #' @param data  [N,M] numeric matrix, N samples, M variables/dimensions.
 #'
@@ -128,8 +126,6 @@ cb.envelope <- function(data){
 
 #' Find observations that are outside confidence intervals in at least one variable
 #'
-#' @description
-#'
 #' @param data.train (n,m) numeric matrix, n samples, m variables. The samples define the empirical cdfs of the m variables. Variables correspond to multiple hypotheses.
 #' @param cb.low (1,m) numeric vector, lower CI limit for each of the dimensions
 #' @param cb.high (1,m) numeric vector, upper CI limit for each of the dimensions
@@ -145,25 +141,13 @@ row.outside.ci <- function(data.train, cb.low, cb.high){
 }
 
 
-#' #' Count of cb violations in vector x
-#' cb.violations <- function( x, cb.low, cb.high ) {
-#'   sum( sapply( 1:length(cb.high), function(i) cb.low[i] > x[i] || cb.high[i] < x[i] ) )
-#' }
-#'
-#' #' Does vector x violate cb with criterion L
-#' cb.contains <- function( x, cb.low, cb.high, L ) {
-#'   cb.violations( x, cb.low, cb.high ) <= L
-#' }
-#'
-#' #' Total number of rows in X that do not violate cb
-#' total.contained <- function( X, cb.low, cb.high, L ) {
-#'   sum( apply( X, 1, function(x) cb.contains( x, cb.low, cb.high, L ) ) )
-#' }
+# #' Total number of rows in X that do not violate cb
+# total.contained <- function( X, cb.low, cb.high, L ) {
+#   sum( apply( X, 1, function(x) cb.contains( x, cb.low, cb.high, L ) ) )
+# }
 
 
 #' Compute Pr[V(x|x_u,x_l)<=L] using X_train, K, L and X_test
-#'
-#' @description
 #'
 #' @param cbfun function, Function to compute mvci with, should take only X_train as input
 #' @param X_train [N0,M] numeric matrix, Training data, N samples, M variables.
@@ -189,9 +173,45 @@ prc.inside.cb <- function(cbfun, X_train, X_test, L){
 }
 
 
-#' Width of the mvci
+#' Does vector x violate cb with criterion L
 #'
 #' @description
+#' TODO: a lot like ci_contains()
+#'
+#' @param x [M,1] numeric, A data vector
+#' @param cb.low (1,m) numeric vector, lower CI limit for each of the dimensions
+#' @param cb.high (1,m) numeric vector, upper CI limit for each of the dimensions
+#' @param L [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
+#'
+#' @return logical, TODO
+#'
+#' @export
+cb.contains <- function( x, cb.low, cb.high, L ) {
+  cb.violations( x, cb.low, cb.high ) <= L
+}
+
+
+#' Count of cb violations in vector x
+#'
+#' @description
+#' Returns the number of points in which a vector x lies outside cb
+#'
+#' @param x [M,1] numeric, A data vector
+#' @param cb.low (1,m) numeric vector, lower CI limit for each of the dimensions
+#' @param cb.high (1,m) numeric vector, upper CI limit for each of the dimensions
+
+#'
+#' @return integer, Number of values in x that are outside cb. TODO: correct?
+#'
+#' @export
+cb.violations <- function( x, cb.low, cb.high ) {
+   sum( sapply( 1:length(cb.high),
+                function(i) cb.low[i] > x[i] ||
+                            cb.high[i] < x[i] ) )
+}
+
+
+#' Width of the mvci
 #'
 #' @param cb list, mvci specifications produced by one of the mvci functions
 #'

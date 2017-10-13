@@ -17,5 +17,5 @@ A list with elements:
 \item{min/max}{you get it...}
 }
 \description{
-
+Data envelope and related statistics
 }

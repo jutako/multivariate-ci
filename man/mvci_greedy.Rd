@@ -6,7 +6,7 @@
 bottom-up
 top-down
 Greedy methods to find MVCIs
-TODO: contains oly bottom-up, not the more frequent top-dowm}
+TODO: contains only bottom-up, not the more frequent top-down}
 \usage{
 mvci_greedy(dmat, k, l, method = "bottomup_byrow")
 }
@@ -16,6 +16,8 @@ mvci_greedy(dmat, k, l, method = "bottomup_byrow")
 \item{k}{[1,1] integer, Number of observations (rows) to remove}
 
 \item{l}{[1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI}
+
+\item{method}{char, Method to select, allowed: {'bottomup_byrow'}}
 }
 \value{
 A list describing the multivariate confidence band.

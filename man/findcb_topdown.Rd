@@ -24,7 +24,7 @@ Manuscript algorithm 1: Greedy
 Algorithm:
  do k times:
    1. solve k = 0, l > 0 to get CB
-   2. decide wich row to remove and remove it
+   2. decide which row to remove and remove it
  For the N-k row remaining rows, solve k = 0, l > 0 to get CB.
 
  Output:

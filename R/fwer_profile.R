@@ -4,22 +4,22 @@
 
 #' Generic B -fold crossvalidation curve
 #'
-#' Input:
-#'   cbfun         Function to compute the confidence bands with, interface: cbmat = cbfun(data, k)
-#'   cb.contains.fun     Function to test if vector x belongs to a given CB
-#'   data          (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
-#'                 empirical cdfs of the m variables.
-#'   B             (1,1) integer, How many cross validation folds to use. l = [2,...,N].
-#'   k.max  (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#' @param cbfun Function to compute the confidence bands with, interface: cbmat = cbfun(data, k)
+#' @param cb.contains.fun Function to test if vector x belongs to a given CB
+#' @param data (N,M) numeric matrix, N samples, M dimensions/variables.
+#'             The samples define the empirical cdfs of the M variables.
+#' @param B (1,1) integer, How many cross validation folds to use. l = [2,...,N].
+#' @param k.max (1,1) integer, Threshold for ending the computation. When more than 'k.max'
 #'                 of the test fold observations are outside confidence band the profile computation
 #'                 ends. Can be used to speed up computations when only the beginning of the profile
 #'                 curve is of interest.
 #'
-#' Output:
-#'   A list with elements:
-#'   profile   (1,N-floor(N/B)) numeric, Crossvalidation based profile of FWER control
+#' @return A list with elements:
+#' \item{profile}{(1,N-floor(N/B)) numeric, Crossvalidation based profile of FWER control}
 #'
-fold.profile <- function(cbfun, cb.contains.fun, data, B, k.max=floor(0.5*((B-1)/B)*nrow(data)) ){
+#' @export
+fold.profile <- function(cbfun, cb.contains.fun, data, B,
+                         k.max=floor(0.5*((B-1)/B)*nrow(data)) ){
 
   N = nrow(data)
   M = ncol(data)
@@ -63,28 +63,30 @@ fold.profile <- function(cbfun, cb.contains.fun, data, B, k.max=floor(0.5*((B-1)
 
 #' Generic test set "k profile" (using whichever CB algorithm)
 #'
+#' @description
 #' Determines the iterations k at which observations in the test set become extreme
 #' i.e. do not belong to the confidence band anymore. The result is an (1,N) vector
 #' of integers {0,1,...,nrow(data.test} identifying how many of the test set observations
 #' are extreme at a given k=[1,...,N].
 #'
-#' This funcition is needed in the fold.profile() algorithm.
+#' This function is needed in the fold.profile() algorithm.
 #'
-#' Input:
-#'   cbfun         Function to compute the confidence bands with, interface: cbmat = cbfun(data, k)
-#'   cb.contains.fun     Function to test if vector x belongs to a given CB, TRUE = inside, F = outside
-#'   data.train         (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
+#' @param cbfun Function to compute the confidence bands with, interface: cbmat = cbfun(data, k)
+#' @param cb.contains.fun Function to test if vector x belongs to a given CB, TRUE = inside, F = outside
+#' @param data.train (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
 #'                   empirical cdfs of the m variables.
-#'   data.test       (N.test,M) numeric matrix, Test dataset
-#'   k.max    (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#' @param data.test (N.test,M) numeric matrix, Test dataset
+#' @param k.max (1,1) integer, Threshold for ending the computation. When more than 'k.max'
 #'                   of the observations in 'data.test' are outside confidence band the profile
 #'                   computation ends. Can be used to speed up computations when only the beginning of the profile
 #'                   curve is of interest.
 #'
-#' Output:
-#'   A list with elements:
-#'   k.profile   (1,N) vector of integers [0,1,...,nrow(data.test)]
-k.profile <- function(cbfun, cb.contains.fun, data.train, data.test, k.max=floor(0.5*nrow(data.train))){
+#' @return A list with elements:
+#' \item{k.profile}{(1,N) vector of integers [0,1,...,nrow(data.test)]}
+#'
+#' @export
+k.profile <- function(cbfun, cb.contains.fun, data.train, data.test,
+                      k.max=floor(0.5*nrow(data.train))){
 
   #   data.train <- makeX(20, 50)
   #   data.test <- makeX(5, 50)
@@ -134,24 +136,25 @@ k.profile <- function(cbfun, cb.contains.fun, data.train, data.test, k.max=floor
 
 
 
-## Minimum width envelope confidence region, FWER controlled, l fold crossvalidation
-#
-# Using cross validation approach aims at approximating the effective k to be used in the mwe.ci()
-# function so that FWER is controlled at level alpha. Improves upon mwe.fwer.ci() which for small N
-# outputs instabile results. Crossvalidation smooths out the instability.
-#
-# Input:
-#   data          (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
-#                                       empirical cdfs of the m variables.
-#   B             (1,1) integer, How many cross validation folds to use. l = [2,...,N].
-#   k.max  (1,1) integer, Threshold for ending the computation. When more than 'k.max'
-#                 of the test fold observations are outside confidence band the profile computation
-#                 ends. Can be used to speed up computations when only the beginning of the profile
-#                 curve is of interest.
-#
-# Output:
-#   A list with elements:
-#   profile   (1,N-floor(N/B)) numeric, Crossvalidation based profile of FWER control
+#' Minimum width envelope confidence region, FWER controlled, l fold crossvalidation
+#'
+#' @description
+#' Using cross validation approach aims at approximating the effective k to be used in the mwe.ci()
+#' function so that FWER is controlled at level alpha. Improves upon mwe.fwer.ci() which for small N
+#' outputs instabile results. Crossvalidation smooths out the instability.
+#'
+#' @param data (N,M) numeric matrix, N samples, M dimensions/variables.
+#'             The samples define the empirical cdfs of the m variables.
+#' @param B (1,1) integer, How many cross validation folds to use. l = [2,...,N].
+#' @param k.max (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#'                 of the test fold observations are outside confidence band the profile computation
+#'                 ends. Can be used to speed up computations when only the beginning of the profile
+#'                 curve is of interest.
+#'
+#' @return A list with elements:
+#' \item{profile}{(1,N-floor(N/B)) numeric, Crossvalidation based profile of FWER control}
+#'
+#' @export
 mwe.fold.profile <- function(data, B, k.max = floor(0.5*((B-1)/B)*nrow(data)) ){
 
   N = nrow(data)
@@ -199,27 +202,28 @@ mwe.fold.profile <- function(data, B, k.max = floor(0.5*((B-1)/B)*nrow(data)) ){
 }
 
 
-## Test set "k profile" using Minimum Width Envelope greedy algorithm
-#
-# Determines the iterations k at which observations in the test set become extreme
-# i.e. do not belong to the confidence band anymore. The result is an (1,N) vector
-# of integers {0,1,...,nrow(data.test} identifying how many of the test set observations
-# are extreme at a given k=[1,...,N].
-#
-# This funcition is needed in the mwe.fold() algorithm.
-#
-# Input:
-#   data.rs         (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
-#                   empirical cdfs of the m variables.
-#   data.test       (N.test,M) numeric matrix, Test dataset
-#   k.max    (1,1) integer, Threshold for ending the computation. When more than 'k.max'
-#                   of the observations in 'data.test' are outside confidence band the profile
-#                   computation ends. Can be used to speed up computations when only the beginning of the profile
-#                   curve is of interest.
-#
-# Output:
-#   A list with elements:
-#   k.profile   (1,N) vector of integers [0,1,...,nrow(data.test)]
+#' Test set "k profile" using Minimum Width Envelope greedy algorithm
+#'
+#' @description
+#' Determines the iterations k at which observations in the test set become extreme
+#' i.e. do not belong to the confidence band anymore. The result is an (1,N) vector
+#' of integers {0,1,...,nrow(data.test} identifying how many of the test set observations
+#' are extreme at a given k=[1,...,N].
+#'
+#' This funcition is needed in the mwe.fold() algorithm.
+#'
+#' @param data.rs (N,M) numeric matrix, N samples, M dimensions/variables. The samples define the
+#'                   empirical cdfs of the m variables.
+#' @param data.test (N.test,M) numeric matrix, Test dataset
+#' @param k.max (1,1) integer, Threshold for ending the computation. When more than 'k.max'
+#'                   of the observations in 'data.test' are outside confidence band the profile
+#'                   computation ends. Can be used to speed up computations when only the beginning of the profile
+#'                   curve is of interest.
+#'
+#' @return A list with elements:
+#' \item{k.profile}{(1,N) vector of integers [0,1,...,nrow(data.test)]}
+#'
+#' @export
 mwe.k.profile <- function(data.rs, data.test, k.max){
 
   N.mwe = nrow(data.rs) #size of MWE computation set
@@ -279,13 +283,13 @@ mwe.k.profile <- function(data.rs, data.test, k.max){
         CER$r.min[1,m] = CER$r.min[2,m]
         CER$env.min[m] = data.rs[CER$n.min[1,m],m]
 
-        min.df <- min.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        min.df <- min_n_set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
         #Note: rmng.row.arr contains the previous 2nd smallest row -> hence look for 2nd smallest el
         CER$n.min[2,m] = rmng.row.arr[min.df$ind[2]]
         CER$r.min[2,m] = min.df$value[2]
 
       } else if (CER$n.min[2,m] == n.opt){
-        min.df <- min.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        min.df <- min_n_set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
         CER$n.min[2,m] = rmng.row.arr[min.df$ind[2]]
         CER$r.min[2,m] = min.df$value[2]
 
@@ -294,12 +298,12 @@ mwe.k.profile <- function(data.rs, data.test, k.max){
         CER$r.max[1,m] = CER$r.max[2,m]
         CER$env.max[m] = data.rs[CER$n.max[1,m],m]
 
-        max.df <- max.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        max.df <- max_n_set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
         CER$n.max[2,m] = rmng.row.arr[max.df$ind[2]]
         CER$r.max[2,m] = max.df$value[2]
 
       } else if (CER$n.max[2,m] == n.opt){
-        max.df <- max.n.set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
+        max.df <- max_n_set(data.rank[rmng.row.arr,m],k=2) #O(N.mwe)
         CER$n.max[2,m] = rmng.row.arr[max.df$ind[2]]
         CER$r.max[2,m] = max.df$value[2]
       }

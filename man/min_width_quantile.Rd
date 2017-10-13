@@ -20,5 +20,5 @@ Excludes k extreme values from x such that the remaining contiguous range has th
 shortest width.
 
 Note: If the distribution of x is uniform, e.g. x = 1:N, or otherwise there are
-sevaral shortest intervals then the first is returned, in this example 1:(N-k).
+several shortest intervals then the first is returned, in this example 1:(N-k).
 }

@@ -17,5 +17,5 @@ row.outside.ci(data.train, cb.low, cb.high)
 [M,1] logical, True if the observation (row) exits the mvci
 }
 \description{
-
+Find observations that are outside confidence intervals in at least one variable
 }

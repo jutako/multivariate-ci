@@ -16,7 +16,7 @@ A list with upper and lower mvci boundary.
 TODO: return value differs from that of other methods.
 }
 \description{
-Mininum width quantile (1-a)*100% CI for a data matrix.
+Minimum width quantile (1-a)*100% CI for a data matrix.
 Applies smallest_ci() to each column of X.
 Does not control FWER over multiple dimensions like mvci_min_width_quantile().
 }

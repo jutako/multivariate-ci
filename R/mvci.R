@@ -3,7 +3,7 @@
 #' top-down
 
 #' Greedy methods to find MVCIs
-#' TODO: contains oly bottom-up, not the more frequent top-dowm
+#' TODO: contains only bottom-up, not the more frequent top-down
 #'
 #'@description
 #' A wrapper to call different methods with different initializations
@@ -11,8 +11,10 @@
 #' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows,
 #' @param k [1,1] integer, Number of observations (rows) to remove
 #' @param l [1,1] integer, Max number of outlier dimensions for a data row that is counted as within MVCI
-#'
+#' @param method char, Method to select, allowed: {'bottomup_byrow'}
 #' @return A list describing the multivariate confidence band.
+#'
+#' @importFrom stats median
 #'
 #' @export
 mvci_greedy <- function(dmat, k, l, method='bottomup_byrow'){
@@ -20,7 +22,7 @@ mvci_greedy <- function(dmat, k, l, method='bottomup_byrow'){
 
   if (method == 'bottomup_byrow'){
     # add median as starting point
-    dmat <- rbind(dmat, apply(dmat, 2, median))
+    dmat <- rbind(dmat, apply(dmat, 2, stats::median))
     cires <- findcb_bottomup_byrow(dmat, k, l, nrow(dmat))
 
     # remove starting point
@@ -176,13 +178,13 @@ createEnvelopeMasks <- function(dmat, Z){
 #' @keywords internal
 updateEnvelopeMasks <- function(mvci, rowInd, pointDF){
 
-  pdfs <- subset(pointDF, isover)
+  pdfs <- subset(pointDF, pointDF$isover)
   if (nrow(pdfs) > 0){
     mvci$upmask[, pdfs$colind] <- F #remove existing
     mvci$upmask[rowInd, pdfs$colind] <- T # add new
   }
 
-  pdfs <- subset(pointDF, !isover)
+  pdfs <- subset(pointDF, !pointDF$isover)
   if (nrow(pdfs) > 0){
     mvci$downmask[, pdfs$colind] <- F #remove existing
     mvci$downmask[rowInd, pdfs$colind] <- T # add new
@@ -218,10 +220,8 @@ getEnvelope <- function(dmat, Z){
 
 #' Get confidence band (envelope) based on row indices
 #'
-#'@description
-#'
 #' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows,
-#' @param rowinds [] interger, TODO
+#' @param rowinds [] integer, TODO
 #'
 #' @return A list with two vectors indicating values of mvci for each dimension
 #'
@@ -255,7 +255,7 @@ getEnvelopeRow <- function(dmat, rowinds){
 #' @param dmat [N,M] numeric, Data, vector valued M-dimensional observations on rows,
 #' @param mvci list, mvci result list
 #'
-#' @return A data.frame with colum indices, $isover and cost
+#' @return A data.frame with column indices, $isover and cost
 #'
 #' @keywords internal
 points_outside_ci <- function(rowind, dmat, mvci){
@@ -288,7 +288,7 @@ points_outside_ci <- function(rowind, dmat, mvci){
 #' Algorithm:
 #'  do k times:
 #'    1. solve k = 0, l > 0 to get CB
-#'    2. decide wich row to remove and remove it
+#'    2. decide which row to remove and remove it
 #'  For the N-k row remaining rows, solve k = 0, l > 0 to get CB.
 #'
 #'  Output:
@@ -365,6 +365,8 @@ findcb_topdown <- function(dmat, K, L, verbose = F){ #(K(M^2logM + NlogN))
 #'
 #' @return A list describing the multivariate confidence band.
 #'
+#' @importFrom utils tail
+#'
 #' @keywords internal
 remove_points_cb <- function(dmat, l){ #O(M^2logM)
 
@@ -403,8 +405,8 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
     d.gains$col[ind] <- m
     d.gains$islow[ind] <- T
 
-    d.gains$gain[ind+1] <-  dmat[tail(d.order[[m]],1), m] -
-      dmat[tail(d.order[[m]],2)[1], m]
+    d.gains$gain[ind+1] <-  dmat[utils::tail(d.order[[m]],1), m] -
+      dmat[utils::tail(d.order[[m]],2)[1], m]
     d.gains$col[ind+1] <- m
     d.gains$islow[ind+1] <- F
 
@@ -431,7 +433,7 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
         crow <- d.order[[ ccol ]][1]
       } else {
         cislow <- F
-        crow <- tail(d.order[[ ccol ]], 1)
+        crow <- utils::tail(d.order[[ ccol ]], 1)
       }
 
       # check if point can be removed
@@ -458,8 +460,8 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
 
           } else {
             d.order[[ccol]] <- d.order[[ccol]][-length(d.order[[ccol]])] #pop last
-            d.gains$gain[tmpidx] <- dmat[tail(d.order[[ccol]],1), ccol] -
-              dmat[tail(d.order[[ccol]],2)[1], ccol]
+            d.gains$gain[tmpidx] <- dmat[utils::tail(d.order[[ccol]],1), ccol] -
+              dmat[utils::tail(d.order[[ccol]],2)[1], ccol]
           }
           #if (is.na(d.gains$gain[tmpidx])){ browser() }
         } else {
@@ -476,7 +478,7 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
   upmask <- matrix(F, nrow = N, ncol = M)
   for (m in 1:M){ #O(M)
     downmask[d.order[[m]][1], m] <- T
-    upmask[tail(d.order[[m]],1), m] <- T
+    upmask[utils::tail(d.order[[m]],1), m] <- T
   }
 
   list(Z = Z, upmask = upmask, downmask = downmask, d.order = d.order)
@@ -494,6 +496,8 @@ remove_points_cb <- function(dmat, l){ #O(M^2logM)
 #'
 #' @return A data.frame with costs for each row of data
 #'
+#' @importFrom utils tail
+#'
 #' @keywords internal
 collect_costs <- function(dmat, d.order){ #O(M)
   N <- nrow(dmat)
@@ -507,9 +511,9 @@ collect_costs <- function(dmat, d.order){ #O(M)
                                           dmat[d.order[[m]][1], m])
 
     #up
-    costs$cost[ tail(d.order[[m]],1) ] <-  costs$cost[tail(d.order[[m]],1)] +
-                                              abs(dmat[tail(d.order[[m]],1), m] -
-                                                  dmat[tail(d.order[[m]],2)[1], m])
+    costs$cost[ utils::tail(d.order[[m]],1) ] <-  costs$cost[utils::tail(d.order[[m]],1)] +
+                                              abs(dmat[utils::tail(d.order[[m]],1), m] -
+                                                  dmat[utils::tail(d.order[[m]],2)[1], m])
   }
 
   costs

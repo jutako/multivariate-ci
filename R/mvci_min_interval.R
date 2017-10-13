@@ -7,7 +7,7 @@
 #' separately for each variable
 #'
 #' Adjusts the number of observations to exclude (i.e. the percentage a in function
-#' f()) such that the total number of rows insice the confidence area mathces n-k
+#' f()) such that the total number of rows inside the confidence area matches n-k
 #'
 #' @param X [N,M] numeric, Data matrix, vector valued M-dimensional observations on rows,
 #' @param k [1,1] integer, Number of observations (rows) to remove
@@ -15,6 +15,7 @@
 #'
 #' @return A list describing the multivariate confidence band.
 #'
+#' @importFrom stats uniroot
 #' @export
 mvci_min_width_quantile <- function( X, k, l ) {
   X <- as.matrix( X )
@@ -23,7 +24,7 @@ mvci_min_width_quantile <- function( X, k, l ) {
     ci <- get_ci( X, a )
     total_contained( ci, X, l ) - (n-k)
   }
-  aopt <- uniroot( f, c(0,0.5) )$root
+  aopt <- stats::uniroot( f, c(0,0.5) )$root
   get_ci( X, aopt )
 }
 
@@ -36,7 +37,7 @@ mvci_uniform_percentiles <- mvci_min_width_quantile
 #' Naive quantile based multivariate confidence interval (mvci)
 #'
 #' @description
-#' Mininum width quantile (1-a)*100% CI for a data matrix.
+#' Minimum width quantile (1-a)*100% CI for a data matrix.
 #' Applies smallest_ci() to each column of X.
 #' Does not control FWER over multiple dimensions like mvci_min_width_quantile().
 #'
@@ -54,13 +55,13 @@ get_ci <- function( X, alpha ) {
 }
 
 
-#' Mininum width confidence interval for a data vector
+#' Minimum width confidence interval for a data vector
 #'
 #' @description
 #' Returns (1 - k/length(x)) * 100% CI for a data vector using minimum width quantiles
 #' TODO: same as min_width_quantile()
 #'
-#' @param c [M,1] numeric, A data vector
+#' @param x [M,1] numeric, A data vector
 #' @param k [1,1] integer, Number of observations to leave outside the interval
 #'
 #' @return A list with upper and lower mvci boundary.

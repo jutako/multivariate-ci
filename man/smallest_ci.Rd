@@ -2,14 +2,14 @@
 % Please edit documentation in R/mvci_min_interval.R
 \name{smallest_ci}
 \alias{smallest_ci}
-\title{Mininum width confidence interval for a data vector}
+\title{Minimum width confidence interval for a data vector}
 \usage{
 smallest_ci(x, k)
 }
 \arguments{
-\item{k}{[1,1] integer, Number of observations to leave outside the interval}
+\item{x}{[M,1] numeric, A data vector}
 
-\item{c}{[M,1] numeric, A data vector}
+\item{k}{[1,1] integer, Number of observations to leave outside the interval}
 }
 \value{
 A list with upper and lower mvci boundary.

@@ -14,7 +14,7 @@ points_outside_ci(rowind, dmat, mvci)
 \item{mvci}{list, mvci result list}
 }
 \value{
-A data.frame with colum indices, $isover and cost
+A data.frame with column indices, $isover and cost
 }
 \description{
 Report each point along with associated costs

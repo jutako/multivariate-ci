@@ -9,11 +9,11 @@ getEnvelopeRow(dmat, rowinds)
 \arguments{
 \item{dmat}{[N,M] numeric, Data, vector valued M-dimensional observations on rows,}
 
-\item{rowinds}{[] interger, TODO}
+\item{rowinds}{[] integer, TODO}
 }
 \value{
 A list with two vectors indicating values of mvci for each dimension
 }
 \description{
-
+Get confidence band (envelope) based on row indices
 }

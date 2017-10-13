@@ -3,7 +3,22 @@
 ##########################################################################################
 
 #' Plot CB when also whole rows have been removed
-plot.data.ci <- function(dmat, Z, upmask, downmask, type = 'outside',
+#'
+#' @param dmat [N,M] numeric, Data matrix
+#' @param Z [N,M] logical, Output of some mvci method, mvci$Z
+#' @param upmask [N,M] logical, Output of some mvci method, mvci$upmask
+#' @param downmask [N,M] logical, Output of some mvci method, mvci$downmask
+#' @param type char {'inside','outside'}, 'outside' -> plot rows outside CB in red, 'inside' -> plot rows inside CB in red
+#' @param title char, Plot title
+#' @param xlab char, Plot x axis label
+#' @param ylab char, Plot y axis label
+#'
+#' @return Base graphics plot to current plotting device
+#'
+#' @importFrom graphics lines plot points
+#'
+#' @export
+plot_data_ci <- function(dmat, Z, upmask, downmask, type = 'outside',
                          title = 'CI plot',
                          xlab = 'time / variables',
                          ylab = 'value'){
@@ -30,7 +45,25 @@ plot.data.ci <- function(dmat, Z, upmask, downmask, type = 'outside',
 
 
 #' Plot CB if only points have been removed
-plot.data.ci2 <- function(dmat, upmask, downmask,
+#'
+#' @param dmat [N,M] numeric, Data matrix
+#' @param upmask [N,M] logical, Output of some mvci method, mvci$upmask
+#' @param downmask [N,M] logical, Output of some mvci method, mvci$downmask
+#' @param timevec [1,M] numeric, Plot positions of the columns of dmat
+#' @param title char, Plot title
+#' @param xlab char, Plot x axis label
+#' @param ylab char, Plot y axis label
+#' @param ylim [1,2] numeric, y axis limits
+#' @param draw.cb.points [1,1] logical, Draw points that define CB boundary
+#' @param samp.frac [1,1] numeric, Sampling fraction from range [0,1]
+#' @param yintercept [1,1] numeric, Horizontal line y axis intercept, default: no horizontal line
+#'
+#' @return Base graphics plot to current plotting device
+#'
+#' @importFrom graphics lines plot points
+#'
+#' @export
+plot_data_ci2 <- function(dmat, upmask, downmask,
                           timevec = 1:ncol(dmat),
                           title = 'CI plot',
                           xlab = 'time / variables',
@@ -66,7 +99,27 @@ plot.data.ci2 <- function(dmat, upmask, downmask,
 
 
 #' Plot CB
-plot.data.cb <- function(dmat, cb,
+#'
+#' @param dmat [N,M] numeric, Data matrix
+#' @param cb list, The output of some mvci method
+#' @param timevec [1,M] numeric, Plot positions of the columns of dmat
+#' @param title char, Plot title
+#' @param xlab char, Plot x axis label
+#' @param ylab char, Plot y axis label
+#' @param ylim [1,2] numeric, y axis limits
+#' @param xlim [1,2] numeric, x axis limits
+#' @param draw.cb.points [1,1] logical, Draw points that define CB boundary
+#' @param highlight.rows.out [1,1] logical, Should curves that exit CB be highlighted?
+#' @param samp.frac [1,1] numeric, Sampling fraction from range [0,1]
+#' @param yintercept [1,1] numeric, Horizontal line y axis intercept, default: no horizontal line
+#' @param xaxt char, Passed on to base::plot()
+#'
+#' @return Base graphics plot to current plotting device
+#'
+#' @importFrom graphics lines plot points
+#'
+#' @export
+plot_data_cb <- function(dmat, cb,
                          timevec = 1:ncol(dmat),
                          title = 'CB plot',
                          xlab = 'time / variables',
@@ -107,7 +160,6 @@ plot.data.cb <- function(dmat, cb,
     }
   }
 
-
   # confidence bands
   lines(timevec, ciup, lwd=2.5, col='blue')
   lines(timevec, cidown, lwd=2.5, col='blue')
@@ -123,26 +175,3 @@ plot.data.cb <- function(dmat, cb,
   }
 
 }
-
-
-
-plot.stockd <- function(cb){
-
-  m <- matrix(c(1,1,1,2), ncol = 1)
-  layout(m)
-  #layout.show()
-
-  titlestr <- sprintf('stockdata, K=%d, L=%d', cb$K, cb$L)
-  plot.data.cb(cb$data, cb,
-               timevec = cb$time,
-               title = titlestr,
-               draw.cb.points = F,
-               ylim = c(-200, 800),
-               yintercept = 0)
-
-  cs <- colSums(!cb$Z)
-  barplot(cs-cb$K)
-
-}
-
-

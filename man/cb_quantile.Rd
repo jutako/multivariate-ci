@@ -14,7 +14,7 @@ cb_quantile(dmat, k, quantile.fun = min_width_quantile)
 \item{quantile.fun}{function, A function to compute the 1D quantiles with,
 defaults to min_width_quantile()
 Should accept two arguments: a data vector x and number of observations to
-exluce k. See min_width_quantile() and central_quantile() for examples.}
+exclude k. See min_width_quantile() and central_quantile() for examples.}
 }
 \value{
 A list with elements:
